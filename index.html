@@ -240,8 +240,8 @@
     justify-content: center;
     padding: 20px;
     opacity: 0;
-    transform: translateX(60px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateX(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
     pointer-events: none;
   }
   .slide.active {
@@ -251,7 +251,25 @@
   }
   .slide.exit-left {
     opacity: 0;
-    transform: translateX(-60px);
+    transform: translateX(-80px);
+    pointer-events: none;
+  }
+  .slide.exit-right {
+    opacity: 0;
+    transform: translateX(80px);
+    pointer-events: none;
+  }
+  .slide.enter-right {
+    opacity: 0;
+    transform: translateX(80px);
+    transition: none;
+    pointer-events: none;
+  }
+  .slide.enter-left {
+    opacity: 0;
+    transform: translateX(-80px);
+    transition: none;
+    pointer-events: none;
   }
 
   /* Divider */
@@ -1268,11 +1286,27 @@ function buildDots() {
 
 function goTo(n, dir = 1) {
   if (n < 0 || n >= totalSlides) return;
-  slides[currentSlide].classList.remove('active');
-  slides[currentSlide].classList.add(dir >= 0 ? 'exit-left' : '');
-  setTimeout(() => slides[currentSlide >= 0 ? currentSlide : 0].classList.remove('exit-left'), 600);
+  const prevSlide = currentSlide;
+
+  // Remove active and add exit direction class to current slide
+  slides[prevSlide].classList.remove('active');
+  slides[prevSlide].classList.add(dir >= 0 ? 'exit-left' : 'exit-right');
+
+  // Clean up exit class after animation
+  setTimeout(() => {
+    slides[prevSlide].classList.remove('exit-left', 'exit-right');
+  }, 600);
+
+  // Set entry direction for incoming slide
   currentSlide = n;
+  slides[currentSlide].classList.remove('exit-left', 'exit-right');
+  slides[currentSlide].classList.add(dir >= 0 ? 'enter-right' : 'enter-left');
+
+  // Force reflow then activate
+  void slides[currentSlide].offsetWidth;
+  slides[currentSlide].classList.remove('enter-right', 'enter-left');
   slides[currentSlide].classList.add('active');
+
   updateNav();
 }
 
